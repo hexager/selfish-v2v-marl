@@ -1,0 +1,4 @@
+,msg_entropy,msg_entropy,n_symbols_used,n_symbols_used,mi_msg_route,mi_msg_route,mi_msg_move,mi_msg_move,mi_msg_approach,mi_msg_approach
+,mean,std,mean,std,mean,std,mean,std,mean,std
+bits,,,,,,,,,,
+1,0.9860208104629669,0.021962783008536664,2.0,0.0,0.04622254173684647,0.08823935678588547,0.1703624896183154,0.2769309447774891,0.0020807843740793925,0.0021739002321120825

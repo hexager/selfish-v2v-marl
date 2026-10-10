@@ -1,0 +1,5 @@
+,collision_ep_rate,collision_ep_rate,collision_ep_rate,arrival_rate,arrival_rate,arrival_rate,timeout_rate,timeout_rate,timeout_rate,mean_ticks_arrived,mean_ticks_arrived,mean_ticks_arrived,mean_return,mean_return,mean_return,worst_car_return,worst_car_return,worst_car_return,welfare,welfare,welfare
+,mean,std,count,mean,std,count,mean,std,count,mean,std,count,mean,std,count,mean,std,count,mean,std,count
+bits,,,,,,,,,,,,,,,,,,,,,
+0,0.024691358024691357,0.0,2,0.9753086419753086,0.0,2,0.0,0.0,2,8.360759493670887,0.0007458932290998424,2,0.44045781893004116,7.274761123318946e-05,2,0.3543724279835392,0.00014549522246643778,2,0.8809156378600822,0.00014549522246626117,2
+2,0.0257201646090535,0.0,2,0.9742798353909465,0.0,2,0.0,0.0,2,8.350844772967266,0.0056001065035893175,2,0.43488940329218106,0.00030917734774095707,2,0.34927983539094654,0.0005092332786322477,2,0.8697788065843621,0.0006183546954819141,2

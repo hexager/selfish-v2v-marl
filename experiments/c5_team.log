@@ -1,0 +1,26 @@
+[b=0 s=0] upd 1/292 steps 2048 ret -1.024 coll 0.214 arr 0.738 Hmsg 0.00 0s
+[b=2 s=0] upd 1/292 steps 2048 ret -0.983 coll 0.203 arr 0.734 Hmsg 1.39 1s
+[b=0 s=0] upd 30/292 steps 61440 ret -0.134 coll 0.078 arr 0.846 Hmsg 0.00 13s
+[b=2 s=0] upd 30/292 steps 61440 ret -0.187 coll 0.086 arr 0.883 Hmsg 1.38 16s
+[b=0 s=0] upd 59/292 steps 120832 ret 0.080 coll 0.040 arr 0.937 Hmsg 0.00 24s
+[b=2 s=0] upd 59/292 steps 120832 ret 0.076 coll 0.031 arr 0.862 Hmsg 1.37 30s
+[b=0 s=0] upd 88/292 steps 180224 ret 0.285 coll 0.007 arr 0.990 Hmsg 0.00 36s
+[b=2 s=0] upd 88/292 steps 180224 ret -0.037 coll 0.049 arr 0.842 Hmsg 1.32 46s
+[b=0 s=0] upd 117/292 steps 239616 ret 0.264 coll 0.012 arr 0.988 Hmsg 0.00 47s
+[b=0 s=0] upd 146/292 steps 299008 ret 0.261 coll 0.012 arr 0.988 Hmsg 0.00 59s
+[b=2 s=0] upd 117/292 steps 239616 ret 0.009 coll 0.053 arr 0.934 Hmsg 1.35 61s
+[b=0 s=0] upd 175/292 steps 358400 ret 0.323 coll 0.000 arr 1.000 Hmsg 0.00 71s
+[b=2 s=0] upd 146/292 steps 299008 ret 0.297 coll 0.000 arr 0.979 Hmsg 1.36 76s
+[b=0 s=0] upd 204/292 steps 417792 ret 0.261 coll 0.012 arr 0.988 Hmsg 0.00 82s
+[b=2 s=0] upd 175/292 steps 358400 ret 0.194 coll 0.020 arr 0.967 Hmsg 1.36 91s
+[b=0 s=0] upd 233/292 steps 477184 ret 0.296 coll 0.006 arr 0.994 Hmsg 0.00 94s
+[b=0 s=0] upd 262/292 steps 536576 ret 0.248 coll 0.013 arr 0.987 Hmsg 0.00 106s
+[b=2 s=0] upd 204/292 steps 417792 ret 0.224 coll 0.019 arr 0.975 Hmsg 1.36 106s
+[b=0 s=0] upd 291/292 steps 595968 ret 0.326 coll 0.000 arr 1.000 Hmsg 0.00 117s
+[b=0 s=0] upd 292/292 steps 598016 ret 0.259 coll 0.012 arr 0.988 Hmsg 0.00 118s
+done b=0 seed=0
+[b=2 s=0] upd 233/292 steps 477184 ret 0.164 coll 0.031 arr 0.969 Hmsg 1.36 121s
+[b=2 s=0] upd 262/292 steps 536576 ret 0.217 coll 0.024 arr 0.976 Hmsg 1.36 136s
+[b=2 s=0] upd 291/292 steps 595968 ret 0.231 coll 0.019 arr 0.981 Hmsg 1.36 151s
+[b=2 s=0] upd 292/292 steps 598016 ret 0.151 coll 0.032 arr 0.968 Hmsg 1.36 151s
+done b=2 seed=0

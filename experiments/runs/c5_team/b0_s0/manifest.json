@@ -1,0 +1,43 @@
+{
+ "config": {
+  "env": {
+   "n_agents": 2,
+   "grid": 8,
+   "horizon": 20,
+   "vision": 0,
+   "max_start_offset": 2,
+   "reward_mode": "team"
+  },
+  "reward": {
+   "reward_arrival": 1.0,
+   "reward_collision": -5.0,
+   "reward_time": -0.05
+  },
+  "train": {
+   "num_envs": 16,
+   "rollout_len": 128,
+   "total_steps": 600000,
+   "hidden": 64,
+   "anneal_lr": true,
+   "ppo": {
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip": 0.2,
+    "ent_move": 0.01,
+    "ent_msg": 0.001,
+    "epochs": 4,
+    "minibatches": 4
+   }
+  }
+ },
+ "bits": 0,
+ "seed": 0,
+ "env_steps": 598016,
+ "wall_seconds": 117.65574550628662,
+ "python": "3.13.16",
+ "torch": "2.14.1+cu130",
+ "numpy": "2.5.3",
+ "machine": "x86_64",
+ "cpu_threads": 1
+}

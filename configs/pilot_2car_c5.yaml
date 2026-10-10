@@ -1,0 +1,27 @@
+# Pilot v2 (stronger collision penalty, weaker message entropy bonus): two cars, private route, individual rewards. Coefficients are pilot values, not tuned results.
+env:
+  n_agents: 2
+  grid: 8
+  horizon: 20
+  vision: 0                   # IC3Net TJ default; with vision 1, b=0 already matched the oracle
+  max_start_offset: 2
+  reward_mode: individual     # "team" = cooperative diagnostic only, never the main result
+reward:
+  reward_arrival: 1.0
+  reward_collision: -5.0
+  reward_time: -0.05
+train:
+  num_envs: 16
+  rollout_len: 128
+  total_steps: 600000         # placeholder; 600k was not enough to converge (see FINDINGS.md)
+  hidden: 64
+  anneal_lr: true
+  ppo:
+    lr: 0.00025
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip: 0.2
+    ent_move: 0.01
+    ent_msg: 0.001
+    epochs: 4
+    minibatches: 4
