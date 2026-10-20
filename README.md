@@ -31,6 +31,33 @@ python scripts/analyze.py --runs experiments/runs/main --out experiments/results
 
 Speed on one CPU thread: about 3,500–4,000 env steps/s for 2 cars. A 2.4M-step run takes 9–12 minutes.
 
+
+## Traffic Junction (main environment, v1)
+
+Standard Traffic Junction (CommNet / IC3Net / TarMAC): easy 7x7 / 5 cars, medium 14x14 / 10 cars, hard 18x18 / 20 cars;
+cars arrive over time; reward -0.01*tau per step and -10 per collision step; crashed cars keep driving.
+Routes come from IC3Net's MIT-licensed helper (`src/envs/tj_routes.py`, licence in `src/envs/IC3NET_LICENSE.txt`).
+Each arriving car is driven by a network drawn at random from a population of K (default 4); each network trains
+only on its own cars' rewards. Messages: one of 2^b symbols per step, delivered next step, received as the mean of
+the other cars' one-hot symbols (optionally only within `comm_radius`).
+
+```bash
+# look at the environment before training (scripted drivers: random, always_gas, oracle)
+python -m src.viz.replay --config configs/tj_medium.yaml --driver oracle --episodes 5 --out replays/oracle.html --gif replays/oracle.gif
+# train (about 35 min for 5M steps on one CPU thread, medium)
+python -m src.train_tj --config configs/tj_medium.yaml --bits 1 --seed 0 --out experiments/runs/tj
+# evaluate with message interventions (none / mute / random / permute) and scripted baselines
+python -m src.evaluate_tj --runs experiments/runs/tj/medium_b0_s0 experiments/runs/tj/medium_b1_s0 --episodes 500 --out experiments/results/tj_medium
+# watch a trained run
+python -m src.viz.replay --run experiments/runs/tj/medium_b1_s0 --episodes 5 --out replays/medium_b1.html
+```
+
+Open the `.html` replay in any browser: play / pause / step, scrub, colour cars by entry, route or network,
+see each car's message symbol and BRAKE light, hover a car to draw its route.
+
+The two-car pilot environment (`src/envs/intersection.py`, `src/train.py`, `configs/pilot_*`) is kept unchanged so the
+pilot results stay reproducible.
+
 ## Layout
 
 ```

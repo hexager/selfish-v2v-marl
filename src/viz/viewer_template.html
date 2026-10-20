@@ -1,0 +1,338 @@
+<title>Junction Replay</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Semi+Condensed:wght@500;600;700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: board on the left as the main object, an instrument column on the right; stacks on phones.
+   Palette: road-map greys with a road-sign green accent; car colours are categorical by entry. */
+:root {
+  --paper: #f2f3ef; --panel: #fbfbf8; --ink: #1b201f; --muted: #5a625f; --line: #d4d8d1;
+  --verge: #e3e6de; --asphalt: #4b5053; --cell: #565b5e; --lane: #9aa0a2;
+  --accent: #1d7656; --accent-ink: #ffffff; --crash: #cf3a2c; --brake: #e8462f; --ok: #1d7656; --bad: #b5342a;
+  --c1: #2a78d6; --c2: #eb6834; --c3: #12a06c; --c4: #d55181; --c5: #d99500; --c6: #6f55c9; --c7: #8c6239; --c8: #2b9bb3;
+  --badge-bg: #ffffff; --badge-ink: #1b201f;
+  --f-display: "Barlow Semi Condensed", "Arial Narrow", Arial, sans-serif;
+  --f-body: "Barlow", "Segoe UI", Arial, sans-serif;
+  --f-data: "IBM Plex Mono", ui-monospace, Menlo, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --paper: #111514; --panel: #171c1b; --ink: #e6ebe8; --muted: #9aa5a1; --line: #2a3230;
+  --verge: #1a201e; --asphalt: #33393b; --cell: #3b4143; --lane: #6c7476;
+  --accent: #3fb98a; --accent-ink: #0b1411; --crash: #ff6b5c; --brake: #ff7a63; --ok: #3fb98a; --bad: #ff7a6b;
+  --c1: #4f95ea; --c2: #f07d4c; --c3: #2fc185; --c4: #e56f9b; --c5: #f0b12a; --c6: #9a84e8; --c7: #c08a5a; --c8: #47b8cf;
+  --badge-bg: #0f1312; --badge-ink: #e6ebe8; color-scheme: dark; } }
+:root[data-theme="dark"] {
+  --paper: #111514; --panel: #171c1b; --ink: #e6ebe8; --muted: #9aa5a1; --line: #2a3230;
+  --verge: #1a201e; --asphalt: #33393b; --cell: #3b4143; --lane: #6c7476;
+  --accent: #3fb98a; --accent-ink: #0b1411; --crash: #ff6b5c; --brake: #ff7a63; --ok: #3fb98a; --bad: #ff7a6b;
+  --c1: #4f95ea; --c2: #f07d4c; --c3: #2fc185; --c4: #e56f9b; --c5: #f0b12a; --c6: #9a84e8; --c7: #c08a5a; --c8: #47b8cf;
+  --badge-bg: #0f1312; --badge-ink: #e6ebe8; color-scheme: dark; }
+* { box-sizing: border-box; }
+body { background: var(--paper); color: var(--ink); font-family: var(--f-body); font-size: 15px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px));
+  padding-block: 20px 32px; }
+.wrap { max-width: 1120px; margin: 0 auto; display: grid; gap: 18px; }
+header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 16px; }
+h1 { font-family: var(--f-display); font-weight: 700; font-size: 1.9rem; letter-spacing: .01em; margin: 0; text-wrap: balance; }
+.meta { font-family: var(--f-data); font-size: .78rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 4px 14px; }
+.meta b { color: var(--ink); font-weight: 500; }
+main { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+@media (max-width: 880px) { main { grid-template-columns: minmax(0, 1fr); } }
+.board { background: var(--verge); border: 1px solid var(--line); border-radius: 6px; padding: 10px; min-width: 0; }
+canvas { display: block; width: 100%; max-width: 100%; aspect-ratio: 1 / 1; touch-action: manipulation; }
+.side { display: grid; gap: 14px; min-width: 0; }
+.box { background: var(--panel); border: 1px solid var(--line); border-radius: 6px; padding: 12px 14px; display: grid; gap: 10px; min-width: 0; }
+.label { font-family: var(--f-display); font-weight: 600; font-size: .78rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+button, select { font-family: var(--f-display); font-weight: 600; font-size: .95rem; color: var(--ink); background: var(--paper);
+  border: 1px solid var(--line); border-radius: 5px; padding: 6px 11px; cursor: pointer; }
+button:hover, select:hover { border-color: var(--muted); }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+button.primary { background: var(--accent); color: var(--accent-ink); border-color: var(--accent); min-width: 78px; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.clock { font-family: var(--f-data); font-variant-numeric: tabular-nums; font-size: 1.5rem; font-weight: 500; }
+.clock small { font-size: .85rem; color: var(--muted); }
+.stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 8px; }
+.stat { display: grid; gap: 1px; }
+.stat .v { font-family: var(--f-data); font-variant-numeric: tabular-nums; font-size: 1.15rem; font-weight: 500; }
+.stat .k { font-size: .74rem; color: var(--muted); }
+.pill { font-family: var(--f-display); font-weight: 600; font-size: .8rem; letter-spacing: .05em; text-transform: uppercase;
+  padding: 2px 9px; border-radius: 999px; border: 1.5px solid currentColor; }
+.pill.ok { color: var(--ok); } .pill.bad { color: var(--bad); }
+.legend { display: grid; gap: 4px; font-size: .86rem; }
+.legend span.sw { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 7px; vertical-align: -1px; }
+.check { display: flex; gap: 7px; align-items: center; font-size: .9rem; cursor: pointer; }
+.tablewrap { overflow-x: auto; max-height: 300px; overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; font-size: .84rem; }
+th { text-align: left; font-family: var(--f-display); font-weight: 600; font-size: .74rem; letter-spacing: .06em; text-transform: uppercase;
+  color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--line); position: sticky; top: 0; background: var(--panel); }
+td { padding: 4px 6px; border-bottom: 1px solid var(--line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+td.mono { font-family: var(--f-data); }
+tr.hl td { background: color-mix(in srgb, var(--accent) 14%, transparent); }
+.note { font-size: .82rem; color: var(--muted); max-width: 70ch; }
+kbd { font-family: var(--f-data); font-size: .74rem; border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="wrap">
+  <header>
+    <h1 id="title">Junction Replay</h1>
+    <div class="meta" id="meta"></div>
+  </header>
+  <main>
+    <div class="board"><canvas id="board" aria-label="Top-down replay of the traffic junction"></canvas></div>
+    <div class="side">
+      <div class="box">
+        <div class="row" style="justify-content:space-between">
+          <div class="clock" id="clock">t 0 <small>/ 0</small></div>
+          <span class="pill ok" id="verdict">no collision</span>
+        </div>
+        <input type="range" id="scrub" min="0" max="0" value="0" aria-label="Step">
+        <div class="row">
+          <button id="restart" title="Restart (Home)">&#x23EE;</button>
+          <button id="back" title="Step back (Left arrow)">&#x25C0;</button>
+          <button id="play" class="primary" title="Play or pause (Space)">Play</button>
+          <button id="fwd" title="Step forward (Right arrow)">&#x25B6;</button>
+          <select id="speed" aria-label="Speed">
+            <option value="1">1 step/s</option><option value="2">2 step/s</option>
+            <option value="4" selected>4 step/s</option><option value="8">8 step/s</option>
+          </select>
+        </div>
+        <div class="stats">
+          <div class="stat"><span class="v" id="s-on">0</span><span class="k">on grid</span></div>
+          <div class="stat"><span class="v" id="s-in">0</span><span class="k">entered</span></div>
+          <div class="stat"><span class="v" id="s-out">0</span><span class="k">exited</span></div>
+          <div class="stat"><span class="v" id="s-col">0</span><span class="k">cars hit</span></div>
+        </div>
+      </div>
+      <div class="box">
+        <div class="label">Episode</div>
+        <select id="episode" aria-label="Episode"></select>
+        <div class="note" id="ep-note"></div>
+      </div>
+      <div class="box">
+        <div class="label">Display</div>
+        <div class="row">
+          <select id="colorby" aria-label="Colour cars by">
+            <option value="entry">Colour by entry</option>
+            <option value="route">Colour by route</option>
+            <option value="net">Colour by network</option>
+          </select>
+        </div>
+        <label class="check"><input type="checkbox" id="showmsg" checked> Show message symbols</label>
+        <label class="check"><input type="checkbox" id="showtrail" checked> Show trails (3 steps)</label>
+        <label class="check"><input type="checkbox" id="showpaths"> Show every route</label>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="box">
+        <div class="label">Cars this step</div>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Slot</th><th>Route</th><th>&tau;</th><th>Move</th><th>Sym</th><th>Net</th></tr></thead>
+          <tbody id="cars"></tbody>
+        </table></div>
+        <div class="note">Hover a car or a row to draw its route. <kbd>Space</kbd> play, <kbd>&larr;</kbd><kbd>&rarr;</kbd> step.</div>
+      </div>
+    </div>
+  </main>
+  <p class="note" id="footnote">Each frame shows the cars at step t and the move and symbol each one chose at t. Red rings mark cells where cars collided on the way to t. A red bar on a car means it chose BRAKE. Symbols are delivered to other cars at t+1.</p>
+</div>
+
+<script id="replay-data" type="application/json">/*__DATA__*/</script>
+<script>
+(() => {
+  const DATA = JSON.parse(document.getElementById('replay-data').textContent);
+  const M = DATA.meta, EPS = DATA.episodes;
+  const $ = id => document.getElementById(id);
+  const cv = $('board'), ctx = cv.getContext('2d');
+  let ep = 0, t = 0, playing = false, timer = null, hoverUid = null, colors = {};
+
+  const css = n => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+  function readColors() {
+    colors = { verge: css('--verge'), asphalt: css('--asphalt'), cell: css('--cell'), lane: css('--lane'),
+      crash: css('--crash'), brake: css('--brake'), badge: css('--badge-bg'), badgeInk: css('--badge-ink'),
+      ink: css('--ink'), accent: css('--accent'),
+      cat: ['--c1','--c2','--c3','--c4','--c5','--c6','--c7','--c8'].map(css) };
+  }
+  const catColor = i => colors.cat[((i % 8) + 8) % 8];
+
+  // ---------- header ----------
+  $('title').textContent = DATA.title || 'Junction Replay';
+  const metaBits = [['level', M.difficulty], ['grid', M.H + '×' + M.W], ['max cars', M.n_max],
+    ['steps', M.max_steps], ['bits', M.bits], ['vision', M.vision],
+    ['hearing', M.comm_radius == null ? 'all cars' : 'radius ' + M.comm_radius], ['crashes', M.crash_mode]];
+  $('meta').innerHTML = metaBits.map(([k, v]) => `<span>${k} <b>${v}</b></span>`).join('');
+
+  EPS.forEach((e, i) => {
+    const o = document.createElement('option'); o.value = i;
+    o.textContent = `#${i + 1} · ${e.policy.split(' (')[0]} · seed ${e.seed} · ${e.summary.success ? 'no collision' : e.summary.cars_collided + ' cars hit'}`;
+    $('episode').appendChild(o);
+  });
+
+  // ---------- geometry ----------
+  const pathNext = (p, q) => { const P = M.paths[p]; return q + 1 < P.length ? P[q + 1] : null; };
+  function dir(car) {
+    const P = M.paths[car.p], cur = P[car.q], nx = pathNext(car.p, car.q);
+    if (nx) return [nx[0] - cur[0], nx[1] - cur[1]];
+    if (car.q > 0) { const pv = P[car.q - 1]; return [cur[0] - pv[0], cur[1] - pv[1]]; }
+    return [0, 1];
+  }
+  function carColor(car) {
+    const mode = $('colorby').value;
+    if (mode === 'route') return catColor(car.p);
+    if (mode === 'net') return car.k == null ? colors.lane : catColor(car.k);
+    return catColor(M.path_arrival[car.p]);
+  }
+  function resize() {
+    const r = cv.getBoundingClientRect(), d = window.devicePixelRatio || 1;
+    cv.width = Math.round(r.width * d); cv.height = Math.round(r.width * d);
+    ctx.setTransform(d, 0, 0, d, 0, 0); draw();
+  }
+  function rr(x, y, w, h, r) { ctx.beginPath(); ctx.roundRect ? ctx.roundRect(x, y, w, h, r) : ctx.rect(x, y, w, h); }
+
+  // ---------- drawing ----------
+  function draw() {
+    const E = EPS[ep]; if (!E) return;
+    const F = E.frames[t], size = cv.getBoundingClientRect().width, cs = size / Math.max(M.H, M.W);
+    ctx.clearRect(0, 0, size, size);
+    ctx.fillStyle = colors.verge; ctx.fillRect(0, 0, size, size);
+    for (let r = 0; r < M.H; r++) for (let c = 0; c < M.W; c++) if (M.road[r][c]) {
+      ctx.fillStyle = colors.asphalt; ctx.fillRect(c * cs, r * cs, cs, cs);
+      ctx.fillStyle = colors.cell; ctx.fillRect(c * cs + 1, r * cs + 1, cs - 2, cs - 2);
+    }
+    // entry arrows
+    const seen = new Set();
+    M.paths.forEach((P, k) => {
+      const key = P[0].join(','); if (seen.has(key)) return; seen.add(key);
+      const [r, c] = P[0], d = [P[1][0] - r, P[1][1] - c];
+      arrow(c * cs + cs / 2, r * cs + cs / 2, d, cs * 0.28, colors.lane);
+    });
+    if ($('showpaths').checked) M.paths.forEach((P, k) => polyline(P, cs, catColor(M.path_arrival[k]), 1.2, 0.35));
+    // hovered car's route
+    const hov = F.cars.find(x => x.u === hoverUid);
+    if (hov) polyline(M.paths[hov.p].slice(hov.q), cs, carColor(hov), Math.max(2, cs * 0.12), 0.9);
+    // trails
+    if ($('showtrail').checked) for (let back = 3; back >= 1; back--) {
+      const G = E.frames[t - back]; if (!G) continue;
+      for (const car of G.cars) {
+        if (!F.cars.some(x => x.u === car.u)) continue;
+        ctx.globalAlpha = 0.12 * (4 - back); ctx.fillStyle = carColor(car);
+        rr(car.c * cs + cs * 0.3, car.r * cs + cs * 0.3, cs * 0.4, cs * 0.4, cs * 0.12); ctx.fill();
+      }
+      ctx.globalAlpha = 1;
+    }
+    // collision cells (events of the step that led to t)
+    for (const [r, c] of F.hit) {
+      ctx.strokeStyle = colors.crash; ctx.lineWidth = Math.max(2, cs * 0.09);
+      ctx.beginPath(); ctx.arc(c * cs + cs / 2, r * cs + cs / 2, cs * 0.62, 0, Math.PI * 2); ctx.stroke();
+    }
+    // cars (stacked cars in one cell are offset slightly so both stay visible)
+    const occ = {};
+    for (const car of F.cars) {
+      const key = car.r + ',' + car.c, n = occ[key] = (occ[key] || 0) + 1, off = (n - 1) * cs * 0.14;
+      const x = car.c * cs + cs * 0.12 + off, y = car.r * cs + cs * 0.12 + off, w = cs * 0.76;
+      ctx.fillStyle = carColor(car); rr(x, y, w, w, cs * 0.16); ctx.fill();
+      if (car.x) { ctx.strokeStyle = colors.crash; ctx.lineWidth = Math.max(1.5, cs * 0.07); ctx.stroke(); }
+      if (car.u === hoverUid) { ctx.strokeStyle = colors.ink; ctx.lineWidth = 2; ctx.stroke(); }
+      const d = dir(car);
+      arrow(x + w / 2, y + w / 2, d, w * 0.26, 'rgba(255,255,255,0.92)');
+      if (car.m === 1) {                                          // brake light on the rear edge
+        ctx.fillStyle = colors.brake;
+        if (d[0] !== 0) ctx.fillRect(x + w * 0.15, d[0] > 0 ? y + 1 : y + w - w * 0.16 - 1, w * 0.7, w * 0.16);
+        else ctx.fillRect(d[1] > 0 ? x + 1 : x + w - w * 0.16 - 1, y + w * 0.15, w * 0.16, w * 0.7);
+      }
+      if (cs >= 26) {
+        ctx.fillStyle = 'rgba(255,255,255,0.95)'; ctx.font = `500 ${Math.round(cs * 0.24)}px "IBM Plex Mono", monospace`;
+        ctx.textAlign = 'left'; ctx.textBaseline = 'top'; ctx.fillText(String(car.s), x + w * 0.08, y + w * 0.04);
+      }
+      if ($('showmsg').checked && car.g != null && M.bits > 0) badge(x + w, y, car.g, cs);
+    }
+  }
+  function arrow(cx, cy, d, s, col) {
+    ctx.save(); ctx.translate(cx, cy); ctx.rotate(Math.atan2(d[0], d[1]));
+    ctx.fillStyle = col; ctx.beginPath(); ctx.moveTo(s, 0); ctx.lineTo(-s * 0.7, s * 0.75); ctx.lineTo(-s * 0.7, -s * 0.75);
+    ctx.closePath(); ctx.fill(); ctx.restore();
+  }
+  function polyline(P, cs, col, lw, alpha) {
+    ctx.globalAlpha = alpha; ctx.strokeStyle = col; ctx.lineWidth = lw; ctx.lineJoin = 'round'; ctx.beginPath();
+    P.forEach(([r, c], i) => i ? ctx.lineTo(c * cs + cs / 2, r * cs + cs / 2) : ctx.moveTo(c * cs + cs / 2, r * cs + cs / 2));
+    ctx.stroke(); ctx.globalAlpha = 1;
+  }
+  function badge(x, y, g, cs) {
+    const r = Math.max(7, cs * 0.24);
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2);
+    ctx.fillStyle = g === 0 ? colors.badge : colors.accent; ctx.fill();
+    ctx.lineWidth = 1.5; ctx.strokeStyle = colors.accent; ctx.stroke();
+    ctx.fillStyle = g === 0 ? colors.badgeInk : css('--accent-ink');
+    ctx.font = `500 ${Math.round(r * 1.15)}px "IBM Plex Mono", monospace`; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+    ctx.fillText(String(g), x, y + 0.5);
+  }
+
+  // ---------- panel ----------
+  function legend() {
+    const mode = $('colorby').value, L = $('legend'); let items = [];
+    if (mode === 'entry') { const seen = {}; M.path_arrival.forEach((a, k) => { if (!(a in seen)) seen[a] = M.route_labels[k].replace(/,.*$/, '').replace(/ →.*$/, ''); });
+      items = Object.entries(seen).map(([a, l]) => [catColor(+a), l]); }
+    else if (mode === 'route') items = M.route_labels.slice(0, 16).map((l, k) => [catColor(k), l]);
+    else { const nets = new Set(); EPS[ep].frames.forEach(F => F.cars.forEach(c => c.k != null && nets.add(c.k)));
+      items = [...nets].sort((a, b) => a - b).map(k => [catColor(k), 'network ' + k]);
+      if (!items.length) items = [[colors.lane, 'scripted driver (no networks)']]; }
+    L.innerHTML = items.map(([c, l]) => `<div><span class="sw" style="background:${c}"></span>${l}</div>`).join('') +
+      `<div><span class="sw" style="background:transparent;border:2px solid ${colors.crash}"></span>has collided this episode</div>` +
+      `<div><span class="sw" style="background:${colors.brake}"></span>chose BRAKE</div>`;
+  }
+  function panel() {
+    const E = EPS[ep], F = E.frames[t], last = E.frames.length - 1;
+    $('clock').innerHTML = `t ${F.t} <small>/ ${E.frames[last].t}</small>`;
+    $('scrub').max = last; $('scrub').value = t;
+    $('s-on').textContent = F.cars.length; $('s-in').textContent = F.total.spawned;
+    $('s-out').textContent = F.total.arrived;
+    const hitSoFar = new Set(); E.frames.slice(0, t + 1).forEach(G => G.cars.forEach(c => c.x && hitSoFar.add(c.u)));
+    $('s-col').textContent = hitSoFar.size;
+    const v = $('verdict'); const bad = hitSoFar.size > 0;
+    v.textContent = bad ? 'collision' : 'no collision'; v.className = 'pill ' + (bad ? 'bad' : 'ok');
+    $('ep-note').textContent = `${E.policy}. Arrival rate ${E.add_rate}. Episode result: ${E.summary.spawned} cars entered, ${E.summary.completed} exited, ${E.summary.cars_collided} collided.`;
+    $('cars').innerHTML = F.cars.slice().sort((a, b) => a.s - b.s).map(c =>
+      `<tr data-u="${c.u}" class="${c.u === hoverUid ? 'hl' : ''}"><td class="mono">${c.s}</td><td>${M.route_labels[c.p]}</td>` +
+      `<td class="mono">${c.tau}</td><td>${c.m == null ? '–' : c.m === 0 ? 'GAS' : 'BRAKE'}</td>` +
+      `<td class="mono">${c.g == null ? '–' : c.g}</td><td class="mono">${c.k == null ? '–' : c.k}</td></tr>`).join('');
+  }
+  function render() { panel(); draw(); }
+  function go(nt) { const last = EPS[ep].frames.length - 1; t = Math.max(0, Math.min(last, nt)); render(); if (t === last) pause(); }
+  function play() { if (t >= EPS[ep].frames.length - 1) t = 0; playing = true; $('play').textContent = 'Pause';
+    clearInterval(timer); timer = setInterval(() => go(t + 1), 1000 / +$('speed').value); }
+  function pause() { playing = false; $('play').textContent = 'Play'; clearInterval(timer); }
+
+  $('play').onclick = () => playing ? pause() : play();
+  $('fwd').onclick = () => { pause(); go(t + 1); };
+  $('back').onclick = () => { pause(); go(t - 1); };
+  $('restart').onclick = () => { pause(); go(0); };
+  $('scrub').oninput = e => { pause(); go(+e.target.value); };
+  $('speed').onchange = () => { if (playing) play(); };
+  $('episode').onchange = e => { pause(); ep = +e.target.value; t = 0; legend(); render(); };
+  ['colorby', 'showmsg', 'showtrail', 'showpaths'].forEach(id => $(id).onchange = () => { legend(); draw(); });
+  document.addEventListener('keydown', e => {
+    if (e.target.tagName === 'SELECT' || e.target.tagName === 'INPUT') return;
+    if (e.code === 'Space') { e.preventDefault(); playing ? pause() : play(); }
+    else if (e.key === 'ArrowRight') { pause(); go(t + 1); }
+    else if (e.key === 'ArrowLeft') { pause(); go(t - 1); }
+    else if (e.key === 'Home') { pause(); go(0); }
+  });
+  cv.addEventListener('mousemove', e => {
+    const r = cv.getBoundingClientRect(), cs = r.width / Math.max(M.H, M.W);
+    const col = Math.floor((e.clientX - r.left) / cs), row = Math.floor((e.clientY - r.top) / cs);
+    const car = EPS[ep].frames[t].cars.find(c => c.r === row && c.c === col);
+    const u = car ? car.u : null; if (u !== hoverUid) { hoverUid = u; render(); }
+  });
+  cv.addEventListener('mouseleave', () => { hoverUid = null; render(); });
+  $('cars').addEventListener('mouseover', e => { const tr = e.target.closest('tr'); if (tr) { hoverUid = +tr.dataset.u; draw(); } });
+
+  readColors();
+  const refresh = () => { readColors(); legend(); draw(); };
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', refresh);
+  new MutationObserver(refresh).observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+  new ResizeObserver(resize).observe(cv);
+  if (document.fonts) document.fonts.ready.then(draw);
+  legend(); render();
+})();
+</script>

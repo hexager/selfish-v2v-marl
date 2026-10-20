@@ -1,0 +1,34 @@
+# Traffic Junction, medium (standard: 14x14, 10 cars max, 4 entries x 3 routes, 40 steps).
+# Reward and arrivals follow CommNet / IC3Net / TarMAC. Individual rewards (alpha = 0).
+env:
+  difficulty: medium
+  vision: 0                 # IC3Net TJ setting; the pilot showed vision 1 makes messages unnecessary
+  comm_radius: null         # null = every car hears every other car (CommNet/IC3Net); int = local range
+  crash_mode: continue      # TJ standard: crashed cars keep driving; "remove" = pilot ablation
+  swap_collision: true
+  reward_time: -0.01        # times tau (steps since the car entered)
+  reward_collision: -10.0
+  alpha: 0.0                # prosociality weight; 0 = fully self-interested
+curriculum:                 # IC3Net: constant 250/2000 epochs, linear until 1250/2000, then constant
+  add_rate_start: 0.05
+  add_rate_end: 0.2
+  start_frac: 0.125
+  end_frac: 0.625
+population:
+  mode: random              # random = network drawn per car from K; fixed = slot i uses network i
+  K: 4
+train:
+  num_envs: 16
+  rollout_len: 128
+  total_steps: 5000000
+  hidden: 64
+  anneal_lr: true
+  ppo:
+    lr: 0.00025
+    gamma: 0.99
+    gae_lambda: 0.95
+    clip: 0.2
+    ent_move: 0.01
+    ent_msg: 0.001
+    epochs: 4
+    minibatches: 4

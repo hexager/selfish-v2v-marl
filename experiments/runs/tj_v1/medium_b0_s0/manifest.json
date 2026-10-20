@@ -1,0 +1,52 @@
+{
+ "config": {
+  "env": {
+   "difficulty": "medium",
+   "vision": 1,
+   "comm_radius": null,
+   "crash_mode": "continue",
+   "swap_collision": true,
+   "reward_time": -0.01,
+   "reward_collision": -10.0,
+   "alpha": 0.0
+  },
+  "curriculum": {
+   "add_rate_start": 0.05,
+   "add_rate_end": 0.2,
+   "start_frac": 0.125,
+   "end_frac": 0.625
+  },
+  "population": {
+   "mode": "random",
+   "K": 4
+  },
+  "train": {
+   "num_envs": 16,
+   "rollout_len": 128,
+   "total_steps": 5000000,
+   "hidden": 64,
+   "anneal_lr": true,
+   "ppo": {
+    "lr": 0.00025,
+    "gamma": 0.99,
+    "gae_lambda": 0.95,
+    "clip": 0.2,
+    "ent_move": 0.01,
+    "ent_msg": 0.001,
+    "epochs": 4,
+    "minibatches": 4
+   }
+  }
+ },
+ "bits": 0,
+ "seed": 0,
+ "env_steps": 4999168,
+ "updates": 2441,
+ "wall_seconds": 3067.7764444351196,
+ "python": "3.13.16",
+ "torch": "2.14.1+cu130",
+ "numpy": "2.5.3",
+ "machine": "x86_64",
+ "processor": "x86_64",
+ "cpu_threads": 1
+}

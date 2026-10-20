@@ -61,3 +61,44 @@ Planned main sweep after these fixes: b ∈ {0, 1, 2, 4} × 5 seeds × 2.4–5M 
 - No claim about capacity effects. With 1–2 seeds and no significant b-to-b differences, any trend is noise.
 - No evidence of deception or manipulation. F6 shows influence without benefit; it is not manipulation.
 - 4-car and private-urgency variants are not implemented.
+
+---
+
+# Traffic Junction runs (20 Oct 2026)
+
+Setting: standard TJ medium (14x14, up to 10 cars, cars keep arriving, 40 steps, reward -0.01*tau and -10 per
+collision step, crashed cars keep driving), population of K = 4 networks with a random network per car, individual
+rewards, 5M steps, one seed. Evaluation: 500 held-out episodes at the final arrival rate 0.2.
+Raw numbers: `experiments/results/tj_medium/eval.csv`, `experiments/results/tj_medium_v1/eval.csv`.
+Curves: `experiments/results/tj_curves.png`. Replays: `replays/medium_vision1_b1.html`.
+
+| Driver | Vision | Success (no collision) | Cars collided | Return per car |
+| --- | --- | --- | --- | --- |
+| always GAS (scripted) | any | 2.6% | 22.9% | -8.24 |
+| brake for visible car ahead (scripted, no messages) | 1 | 0.4% | 34.2% | -15.69 |
+| **honest 1-bit junction protocol (scripted)** | 1 | **70.3%** (300 episodes) | **3.2%** | -6.97 |
+| full-information oracle (scripted) | any | 100% | 0% | -0.85 |
+| learned, b = 0 | 0 | 2.6% | 25.1% | -5.14 |
+| learned, b = 1 | 0 | 2.6% | 24.4% | -5.39 |
+| learned, b = 0 | 1 | 14.2% | 16.4% | -4.69 |
+| learned, b = 1 | 1 | 7.6% | 19.3% | -4.88 |
+
+**T1. The no-communication baseline reproduces the published pattern.** IC3Net (vision 0, medium) reports 3.4%
+success for independent learners without communication; our vision-0 learners reach 2.6%. Their CommNet and
+IC3Net reach 54% and 89% with continuous, shared-network communication.
+
+**T2. At vision 0 the discrete mean-pooled channel cannot help, even with an honest protocol.** A car cannot see the
+car in front, so any braking causes rear-end crashes, and a mean of symbols does not say where the sender is. The
+honest 1-bit protocol drops success to 0.3%. Vision 0 is therefore the wrong main setting for a discrete channel.
+
+**T3. At vision 1 one honest bit is worth a lot.** The scripted protocol (signal 1 while in or entering the junction;
+wait at the entry if anyone signalled 1) lifts success from below 3% to 70%. So the channel design leaves real room
+for communication, and capacity can matter.
+
+**T4. Self-interested learners do not find that protocol.** At vision 1 the 1-bit learners' messages carry no
+information (MI with route and next move about 0) and mute / random / permute interventions do not change any
+metric. Learned b = 0 at vision 1 (14%) beats every rule without messages. The b = 1 vs b = 0 difference
+(7.6% vs 14.2%) is one seed and is not a finding yet.
+
+**Next (to decide):** cooperative diagnostic (alpha = 1) at vision 1 to test whether IPPO can learn the protocol at all;
+GRU memory; longer training (IC3Net trained about 10M steps); 2 and 4 bits; Eccles speaker/listener biases as an aid.
